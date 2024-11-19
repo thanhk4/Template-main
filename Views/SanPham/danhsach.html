@@ -1,0 +1,55 @@
+<style>
+    .btn{
+      width: auto;
+      margin: 0 5px;
+    }
+    .table img {
+      max-width: 80px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .table-responsive {
+      margin-top: 20px;
+    }
+</style>
+<h1>Danh sách sản phẩm</h1>
+<div class="row mb-3">
+  <div class="d-flex">
+      <a class="btn btn-outline-primary me-1" href="#">Thêm sản phẩm <i class="bi bi-plus"></i></a>
+      <a class="btn btn-outline-dark" href="#"><i class="bi bi-arrow-clockwise"></i></a>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-bordered">
+      <thead>
+          <tr class="text-center">
+              <th scope="col">STT</th>
+              <th scope="col">Tên sản phẩm</th>
+              <th scope="col">Giá bán</th>
+              <th scope="col">Giá sale (Nếu có)</th>
+              <th scope="col">Mô tả</th>
+              <th scope="col">Hình ảnh</th>
+              <th scope="col">Trạng thái</th>
+              <th scope="col">Chức năng</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr>
+              <th scope="row" class="text-center">1</th>
+              <td class="text-center">Nike AF1</td>
+              <td class="text-center">350,000 VND</td>
+              <td class="text-center">300,000 VND</td>
+              <td>Hàng mới</td>
+              <td class="text-center"><img src="https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/4f37fca8-6bce-43e7-ad07-f57ae3c13142/AIR+FORCE+1+%2707.png"></td>
+              <td class="text-center">Còn hàng</td>
+              <td class="text-center">
+                  <a href="#" class="btn btn-outline-success btn-sm">Chi tiết</a>
+                  <a href="#" class="btn btn-outline-warning btn-sm">Sửa</a>
+                  <a href="#" class="btn btn-outline-danger btn-sm">Xóa</a>
+              </td>
+          </tr>
+      </tbody>
+  </table>
+</div>

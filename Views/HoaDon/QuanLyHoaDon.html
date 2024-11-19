@@ -1,0 +1,84 @@
+<div class="container mt-4">
+    <h3>Quản lý đơn hàng</h3>
+    <div class="alert alert-success mt-3" role="alert">
+        Bạn đang ở trang Quản Lý Đơn Hàng, bạn có thể gửi phản hồi của bạn tại đây. 
+        Tìm hiểu thêm về thời gian lấy hàng tại kho NBH <a href="#" class="alert-link">tại đây</a>.
+    </div>
+    <!-- Tabs điều hướng -->
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#" onclick="showTab('tatca')">Tất cả</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('chua-thanh-toan')">Chưa thanh toán</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('cho-dong-goi')">Chờ đóng gói & bàn giao</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('dang-van-chuyen')">Đang vận chuyển</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('da-giao-hang')">Đã giao hàng</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('giao-hang-that-bai')">Giao hàng thất bại</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('huy-don-hang')">Hủy đơn hàng</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('hoan-hang')">Hoàn hàng hoặc hoàn tiền</a>
+        </li>
+    </ul>
+
+    <!-- Bộ lọc đơn hàng -->
+    <div class="card mt-3">
+        <div class="card-body">
+         
+            <div class="row">
+               
+                <div class="col-md-6 mb-3">
+                    <label for="orderNumber">Số đơn hàng:</label>
+                    <input type="text" id="orderNumber" class="form-control" placeholder="Nhập số đơn hàng">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng đơn hàng -->
+    <div class="card mt-3">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <span>Page 1, 1 item</span>
+                <button class="btn btn-secondary btn-sm">Export</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Tổng cộng</th>
+                        <th>Giao hàng</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Đơn hàng cố định -->
+                    <tr>
+                        <td>Giày Thể Thao ABC</td>
+                        <td>1,500,000 VND</td>
+                        <td>Chờ xử lý</td>
+                        <td>Chờ đóng gói</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm">Xác nhận</button>
+                            <button class="btn btn-danger btn-sm">Hủy</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

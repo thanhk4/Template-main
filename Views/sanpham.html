@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sản phẩm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .title { text-align: center; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 30px; } /* Căn giữa tiêu đề */
+        .product-item { 
+            display: flex; 
+            align-items: center; 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            border-radius: 5px; 
+            background-color: rgba(192, 190, 190, 0.945); 
+            margin-bottom: 1rem; 
+
+        }
+        .product-img { width: 80px; height: 80px; object-fit: cover; margin-right: 15px; }
+        .product-info { flex: 1; }
+        .product-actions { display: flex; align-items: center; gap: 10px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #afaeae; transition: 0.4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: 0.4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #1fc250; }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .product-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+      }
+      .product-item {
+          display: flex;
+          align-items: center;
+          border: 1px solid #ddd;
+          padding: 10px;
+          border-radius: 5px;
+          background-color: #fff;
+      }
+      .product-img {
+          width: 80px;
+          height: 80px;
+          object-fit: cover;
+          margin-right: 15px;
+      }
+      .product-info {
+          flex: 1;
+      }
+      .product-name {
+          font-size: 1.1rem;
+          font-weight: bold;
+      }
+      .product-price {
+          color: green;
+          font-size: 1rem;
+      }
+      .product-actions {
+          display: flex;
+          gap: 10px;
+      }
+      .nav-tabs {
+            border-bottom: 1px solid #ddd;
+        }
+        .nav-tabs .nav-link {
+            color: #666;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        .nav-tabs .nav-link.active {
+            color: #e74c3c;
+            border-color: #e74c3c;
+            border-bottom: 2px solid #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="title fw-bold" >DANH SÁCH SẢN PHẨM</h2>
+        
+        <div class="d-flex justify-content-between align-items-center my-3">
+            <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm..." style="width: 80%;">
+            <select id="sortOrder" class="form-control" style="width: 7%; margin-left: 10px;">
+                <option value="none">Sắp xếp</option>
+                <option value="asc">Tên: A-Z</option>
+                <option value="desc">Tên: Z-A</option>
+                
+            </select>
+
+            
+            <button class="btn btn-success ml-3" onclick="addProduct()">Thêm sản phẩm</button> <!-- Nút thêm sản phẩm nằm bên phải -->
+        </div>
+        <div class="container mt-4">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Tất cả</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Đang bán</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Hết hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Dừng bán</a>
+                </li>
+            </ul>
+        </div>
+        <div class="product-list mt-3" id="sanphamList">
+            <!-- Danh sách sản phẩm sẽ được thêm vào đây bằng JavaScript -->
+        </div>
+    </div>
+
+
+<!-- Modal Thêm Sản Phẩm -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductLabel">Thêm Sản Phẩm Mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Hiển thị ảnh xem trước ở đầu modal -->
+                <img id="addProductImagePreview" src="" alt="Hình ảnh sản phẩm" class="img-fluid mb-3" style="width: 100%; height: auto; object-fit: cover; border-radius: 5px;">
+                
+                <form id="addProductForm">
+                    <div class="form-group">
+                        <label for="productName">Tên sản phẩm</label>
+                        <input type="text" id="productName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Mô tả</label>
+                        <textarea id="productDescription" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="productQuantity">Số lượng</label>
+                        <input type="number" id="productQuantity" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Giá bán</label>
+                        <input type="number" id="productPrice" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productBrand">Thương hiệu</label>
+                        <select id="productBrand" class="form-control">
+                            <!-- Các tùy chọn thương hiệu sẽ được tải từ API -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productImage">Hình ảnh</label>
+                        <input type="file" id="productImage" class="form-control" accept="image/*">
+                    </div>
+                    <button type="button" class="btn btn-primary mt-3" onclick="saveProduct()">Lưu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Chỉnh sửa Sản Phẩm -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductLabel">Chỉnh sửa Sản Phẩm</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Hiển thị ảnh sản phẩm ở đầu modal -->
+                <img id="editProductImagePreview" src="" alt="Hình ảnh sản phẩm" class="img-fluid mb-3" style="width: 100%; height: auto; object-fit: cover; border-radius: 5px;">
+                
+                <form id="editProductForm">
+                    <div class="form-group">
+                        <label for="editProductName">Tên sản phẩm</label>
+                        <input type="text" id="editProductName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductDescription">Mô tả</label>
+                        <textarea id="editProductDescription" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductQuantity">Số lượng</label>
+                        <input type="number" id="editProductQuantity" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductPrice">Giá bán</label>
+                        <input type="number" id="editProductPrice" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductBrand">Thương hiệu</label>
+                        <select id="editProductBrand" class="form-control">
+                            <!-- Tùy chọn thương hiệu sẽ được tải từ API -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductImage">Thay đổi hình ảnh</label>
+                        <input type="file" id="editProductImage" class="form-control" accept="image/*">
+                    </div>
+                    <button type="button" class="btn btn-primary mt-3" onclick="saveEditedProduct()">Lưu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- Modal chi tiết sản phẩm -->
+    <div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productDetailLabel">Thông tin chi tiết sản phẩm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Tên sản phẩm:</strong> <span id="detailTensp"></span></p>
+                    <p><strong>Mô tả:</strong> <span id="detailMota"></span></p>
+                    <p><strong>Trạng thái:</strong> <span id="detailTrangthai"></span></p>
+                    <p><strong>Số lượng:</strong> <span id="detailSoluong"></span></p>
+                    <p><strong>Giá bán:</strong> <span id="detailGiaban"></span></p>
+                    <p><strong>Giá sale:</strong> <span id="detailGiasale"></span></p>
+                    <p><strong>Thương hiệu:</strong> <span id="detailThuonghieu"></span></p>
+                    <img id="detailImage" src="" alt="Hình ảnh sản phẩm" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sanphamList = [];
+        let editingProductId = null;
+        let brandsList = [];
+        async function fetchSanpham(searchTerm = '') {
+        try {
+            // Tạo URL tìm kiếm với từ khóa (nếu có)
+            const url = searchTerm 
+                ? `https://localhost:7297/api/Sanpham/search?name=${searchTerm}` 
+                : `https://localhost:7297/api/Sanpham`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'accept': '*/*'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Lỗi khi lấy dữ liệu: ' + response.statusText);
+            }
+
+            sanphamList = await response.json(); // Lưu dữ liệu vào sanphamList
+            displaySanpham(sanphamList); // Hiển thị sản phẩm
+        } catch (error) {
+            console.error('Có lỗi xảy ra:', error);
+        }
+    }
+
+        function displaySanpham(sanpham) {
+            const listContainer = $("#sanphamList");
+            const sortOrder = $("#sortOrder").val();
+           // const statusFilter = $("#statusFilter").val();
+   // Lọc sản phẩm theo trạng thái nếu không phải là "Tất cả trạng thái"
+    let filteredProducts = sanpham;
+// Sắp xếp sản phẩm theo trạng thái: Đang bán (0), Hết hàng (1), Dừng bán (2)
+sanpham.sort((a, b) => a.trangthai - b.trangthai);
+
+            if (sortOrder === "asc") {
+                sanpham.sort((a, b) => a.tensp.localeCompare(b.tensp));
+            } else if (sortOrder === "desc") {
+                sanpham.sort((a, b) => b.tensp.localeCompare(a.tensp));
+            }
+            listContainer.empty();
+            sanpham.forEach((product) => {
+                const imageUrl = product.urlHinhanh || "default_image.jpg";
+                const statusText = product.trangthai === 0 ? "Đang bán" : (product.trangthai === 1 ? "Hết hàng" : "Dừng bán");
+                listContainer.append(`
+                    <div class="product-item">
+                        <img src="${imageUrl}" alt="Hình ảnh sản phẩm" class="product-img">
+                        <div class="product-info">
+                            <div class="product-name">${product.tensp}</div>
+                            <div>Trạng thái: ${statusText}</div>
+                            <div>Số lượng: ${product.soluong}</div>
+                            <div>Giá bán: ${product.giaban} / Giá sale: 0</div>
+                           
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-secondary" onclick="categorizeProduct(${product.id}, '${product.tensp}')">Phân loại hàng</button>
+                            <button class="btn btn-warning" onclick="viewProductDetail(${product.id})">Chi tiết</button>
+                            <button class="btn btn-info" onclick="editProduct(${product.id})">Sửa</button>
+                            <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Xóa</button>
+                            <label class="switch">
+                                <input type="checkbox" onclick="stopSale(${product.id}, this)" ${product.trangthai === 2 ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                              
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        async function viewProductDetail(id) {
+            try {
+                const responseProduct = await fetch(`https://localhost:7297/api/Sanpham/${id}`);
+                if (!responseProduct.ok) throw new Error('Không thể lấy thông tin sản phẩm');
+                const product = await responseProduct.json();
+
+                // Lấy thông tin thương hiệu
+                const responseBrand = await fetch(`https://localhost:7297/api/Thuonghieu/${product.idth}`);
+                if (!responseBrand.ok) throw new Error('Không thể lấy thông tin thương hiệu');
+                const brand = await responseBrand.json();
+
+                $("#detailTensp").text(product.tensp);
+                $("#detailMota").text(product.mota || 'Không có mô tả');
+                $("#detailTrangthai").text(product.trangthai === 0 ? "Đang bán" : product.trangthai === 1 ? "Hết hàng" : "Dừng bán");
+                $("#detailSoluong").text(product.soluong);
+                $("#detailGiaban").text(product.giaban);
+                $("#detailGiasale").text(product.giasale || 'Không có');
+                $("#detailThuonghieu").text(brand.tenthuonghieu);
+                $("#detailImage").attr("src", product.urlHinhanh || "default_image.jpg");
+
+                $("#productDetailModal").modal("show");
+                console.log(brand);
+            } catch (error) {
+                console.error('Có lỗi khi lấy thông tin chi tiết sản phẩm:', error);
+            }
+        }
+
+        function editProduct(id) {
+        editingProductId = id;
+
+        fetch(`https://localhost:7297/api/Sanpham/${id}`)
+            .then(response => response.json())
+            .then(product => {
+                document.getElementById("editProductName").value = product.tensp;
+                document.getElementById("editProductDescription").value = product.mota;
+                document.getElementById("editProductQuantity").value = product.soluong;
+                document.getElementById("editProductPrice").value = product.giaban;
+                document.getElementById("editProductImagePreview").src = product.urlHinhanh || "default_image.jpg";
+
+                // Đặt thương hiệu đã chọn
+                document.getElementById("editProductBrand").value = product.idth;
+
+                $("#editProductModal").modal("show");
+            })
+            .catch(error => console.error("Có lỗi khi lấy thông tin sản phẩm:", error));
+    }
+
+
+
+            function saveEditedProduct() {
+            const productName = document.getElementById("editProductName").value;
+            const productDescription = document.getElementById("editProductDescription").value;
+            const productQuantity = document.getElementById("editProductQuantity").value;
+            const productPrice = document.getElementById("editProductPrice").value;
+            const productBrandId = document.getElementById("editProductBrand").value;
+            const productImageInput = document.getElementById("editProductImage");
+            const productImage = productImageInput.files[0];
+
+            // Lấy URL ảnh cũ
+            const oldImageUrl = document.getElementById("editProductImagePreview").src;
+
+            // Tạo đối tượng sản phẩm đã cập nhật
+            const updatedProduct = {
+                id: editingProductId,
+                tensp: productName,
+                mota: productDescription,
+                soluong: parseInt(productQuantity),
+                giaban: parseFloat(productPrice),
+                idth: parseInt(productBrandId),
+                urlHinhanh: oldImageUrl, // Mặc định là ảnh cũ
+                trangthai: productQuantity > 0 ? 0 : 1 // Đặt trạng thái: 0 nếu có hàng, 1 nếu hết hàng
+            };
+
+            if (productImage) {
+                // Nếu người dùng chọn ảnh mới, chuyển đổi ảnh thành Base64
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    updatedProduct.urlHinhanh = event.target.result; // Cập nhật URL ảnh mới (Base64)
+                    // Gọi hàm updateProduct để gửi yêu cầu cập nhậtszx
+                    updateProduct(updatedProduct);
+                };
+                reader.readAsDataURL(productImage);
+            } else {
+                // Nếu không chọn ảnh mới, giữ nguyên ảnh cũ và cập nhật
+                updateProduct(updatedProduct);
+            }
+        }
+
+        // Định nghĩa hàm updateProduct
+        function updateProduct(product) {
+            fetch(`https://localhost:7297/api/Sanpham/${product.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(product)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Chỉnh sửa sản phẩm thất bại");
+                return product; // Trả về sản phẩm đã cập nhật
+            })
+            .then(editedProduct => {
+                alert("Chỉnh sửa sản phẩm thành công!");
+                $("#editProductModal").modal("hide");
+
+                // Cập nhật sản phẩm trong sanphamList
+                const productIndex = sanphamList.findIndex(p => p.id === editedProduct.id);
+                if (productIndex !== -1) {
+                    sanphamList[productIndex] = editedProduct;
+
+                    // Di chuyển sản phẩm đã cập nhật lên đầu
+                    const [updatedItem] = sanphamList.splice(productIndex, 1);
+                    sanphamList.unshift(updatedItem);
+                }
+
+                // Hiển thị lại danh sách sản phẩm
+                displaySanpham(sanphamList);
+            })
+            .catch(error => {
+                console.error("Có lỗi khi chỉnh sửa sản phẩm:", error);
+                alert("Có lỗi xảy ra khi chỉnh sửa sản phẩm.");
+            });
+        }
+
+
+        function categorizeProduct(id,name){
+            localStorage.setItem("selectedProductId", id);
+            
+            localStorage.setItem("selectedProductName", name);
+            window.location.href = "phanloaisanpham.html"; 
+            console.log(id)
+        }
+
+
+        async function deleteProduct(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+        try {
+            const response = await fetch(`https://localhost:7297/api/Sanpham/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'accept': '*/*'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Xóa sản phẩm thất bại: ' + response.statusText);
+            }
+
+            alert("Xóa sản phẩm thành công!");
+            fetchSanpham(); // Tải lại danh sách sản phẩm sau khi xóa
+        } catch (error) {
+            console.error('Có lỗi khi xóa sản phẩm:', error);
+            alert("Có lỗi xảy ra khi xóa sản phẩm.");
+        }
+    }
+        }
+
+        async function stopSale(id, checkbox) {
+            let apiUrl = checkbox.checked 
+                ? `https://localhost:7297/api/Sanpham/${id}/cancel`
+                : `https://localhost:7297/api/Sanpham/${id}/update-status-load`;
+
+            fetch(apiUrl, { method: 'PUT' })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to update status');
+                return response.text().then(text => text ? JSON.parse(text) : {}); 
+            })
+            .then(data => {
+                console.log('Trạng thái đã được cập nhật');
+
+                // Tìm và cập nhật trạng thái sản phẩm trong sanphamList
+                const updatedProduct = sanphamList.find(sp => sp.id === id);
+                if (updatedProduct) {
+                    // Nếu checkbox được chọn, đặt trạng thái là "Dừng bán" (2)
+                    if (checkbox.checked) {
+                        updatedProduct.trangthai = 2;
+                    } else {
+                        // Nếu số lượng là 0, đặt trạng thái là "Hết hàng" (1); nếu không, đặt là "Đang bán" (0)
+                        updatedProduct.trangthai = updatedProduct.soluong === 0 ? 1 : 0;
+                    }
+                }
+                
+                // Hiển thị lại danh sách sản phẩm sau khi cập nhật
+                displaySanpham(sanphamList);
+            })
+            .catch(error => console.error('Có lỗi xảy ra:', error));
+        }
+
+        function addProduct() {
+            $('#addProductModal').modal('show');
+        }
+        // Sự kiện thay đổi ảnh khi người dùng chọn một tệp ảnh mới
+    document.getElementById("productImage").addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("addProductImagePreview").src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function saveProduct() {
+        const productName = document.getElementById("productName").value;
+        const productDescription = document.getElementById("productDescription").value;
+        const productQuantity = document.getElementById("productQuantity").value;
+        const productPrice = document.getElementById("productPrice").value;
+        const productBrandId = document.getElementById("productBrand").value;
+
+        const productImageInput = document.getElementById("productImage");
+        const productImage = productImageInput.files[0];
+
+        if (!productImage) {
+            alert("Vui lòng chọn ảnh sản phẩm.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const base64Image = event.target.result;
+
+            const newProduct = {
+                tensp: productName,
+                mota: productDescription,
+                soluong: parseInt(productQuantity),
+                giaban: parseFloat(productPrice),
+                idth: parseInt(productBrandId),
+                urlHinhanh: base64Image
+            };
+
+            fetch("https://localhost:7297/api/Sanpham", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newProduct)
+            })
+            .then(response => {
+            if (!response.ok) throw new Error("Thêm sản phẩm thất bại");
+            return response.json(); // Lấy dữ liệu sản phẩm vừa được thêm
+        })
+        .then(addedProduct => {
+            alert("Thêm sản phẩm thành công!");
+            $('#addProductModal').modal('hide'); // Đóng modal sau khi thêm thành công
+            
+            // Thêm sản phẩm mới vào đầu danh sách
+            sanphamList.unshift(addedProduct);
+            
+            // Hiển thị lại danh sách sản phẩm
+            displaySanpham(sanphamList);
+        })
+            .catch(error => {
+                console.error("Có lỗi khi thêm sản phẩm:", error);
+                alert("Có lỗi xảy ra khi thêm sản phẩm.");
+            });
+        };
+        reader.readAsDataURL(productImage);
+         }
+
+
+        async function deleteProduct(id) {
+                    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+                try {
+                    const response = await fetch(`https://localhost:7297/api/Sanpham/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'accept': '*/*'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Xóa sản phẩm thất bại: ' + response.statusText);
+                    }
+
+                    alert("Xóa sản phẩm thành công!");
+                    fetchSanpham(); // Tải lại danh sách sản phẩm sau khi xóa
+                } catch (error) {
+                    console.error('Có lỗi khi xóa sản phẩm:', error);
+                    alert("Có lỗi xảy ra khi xóa sản phẩm.");
+                }
+            }
+                }
+                async function fetchBrands1() {
+                try {
+                    const response = await fetch("https://localhost:7297/api/Thuonghieu");
+                    if (!response.ok) throw new Error("Không thể tải danh sách thương hiệu");
+
+                    brandsList = await response.json();
+                    const brandSelect = document.getElementById("editProductBrand");
+                    brandSelect.innerHTML = brandsList.map(
+                        brand => `<option value="${brand.id}">${brand.tenthuonghieu}</option>`
+                    ).join("");
+                } catch (error) {
+                    console.error("Có lỗi khi tải thương hiệu:", error);
+                }
+            }
+
+        function fetchBrands() {
+            fetch("https://localhost:7297/api/Thuonghieu")
+                .then(response => response.json())
+                .then(data => {
+                    const productBrand = document.getElementById("productBrand");
+                    productBrand.innerHTML = data.map(brand => `<option value="${brand.id}">${brand.tenthuonghieu}</option>`).join("");
+                })
+                .catch(error => console.error("Có lỗi khi tải thương hiệu:", error));
+        }
+
+// Tải các thương hiệu khi trang được tải
+        $(document).ready(() => {
+            fetchSanpham();
+            fetchBrands();
+        });
+
+                $(document).ready(() => {
+                    fetchSanpham();
+                    $("#searchInput").on("keyup", function () {
+                        const value = $(this).val().toLowerCase();
+                        const filteredProducts = sanphamList.filter(product => 
+                            product.tensp.toLowerCase().includes(value) ||
+                            (product.mota && product.mota.toLowerCase().includes(value))
+                        );
+                        displaySanpham(filteredProducts);
+                    });
+                    $("#sortOrder").on("change", function () {
+                        displaySanpham(sanphamList);
+                    });
+                });
+                $(".nav-tabs .nav-link").on("click", function (event) {
+                event.preventDefault();
+                $(".nav-tabs .nav-link").removeClass("active");
+                $(this).addClass("active");
+
+                const selectedTab = $(this).text();
+                let filteredProducts;
+
+                if (selectedTab === "Tất cả") {
+                    filteredProducts = sanphamList;
+                } else if (selectedTab === "Đang bán") {
+                    filteredProducts = sanphamList.filter(product => product.trangthai === 0);
+                } else if (selectedTab === "Hết hàng") {
+                    filteredProducts = sanphamList.filter(product => product.trangthai === 1);
+                } else if (selectedTab === "Dừng bán") {
+                    filteredProducts = sanphamList.filter(product => product.trangthai === 2);
+                }
+
+                displaySanpham(filteredProducts);
+            });
+                document.getElementById("editProductImage").addEventListener("change", function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById("editProductImagePreview").src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+    $(document).ready(() => {
+        fetchSanpham();
+        fetchBrands1(); // Tải danh sách thương hiệu khi trang tải
+    });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+

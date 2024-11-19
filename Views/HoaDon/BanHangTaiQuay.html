@@ -1,0 +1,169 @@
+<div class="container mt-4" ng-controller="BanHangTaiQuayController">
+    <h3>Bán Hàng Tại Quầy</h3>
+
+    <div class="card mt-5">
+        <div class="card-header">
+            Danh sách hóa đơn trong ngày
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Mã hóa đơn</th>
+                        <th>Tên khách hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="hoaDon in hoaDons">
+                        <td>HD#{{$index + 1}}</td>
+                        <td>{{hoaDon.customerName || 'Chưa có tên'}}</td>
+                        <td>{{hoaDon.tongTien | currency:"VND"}}</td>
+                        <td>{{hoaDon.paymentStatus || 'Chưa thanh toán'}}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm" ng-click="xemChiTietHoaDon(hoaDon)">Chi tiết</button>
+                            <button class="btn btn-danger btn-sm" ng-click="xoaHoaDon($index)">Xóa</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Nút tạo hóa đơn mới -->
+    <button class="btn btn-primary mb-3 mt-4" ng-click="taoHoaDonMoi()">Tạo Hóa Đơn Mới</button>
+
+    <!-- Tabs hóa đơn nằm ngang -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" ng-repeat="hoaDon in hoaDons">
+            <a class="nav-link" ng-class="{'active': $index === selectedHoaDonIndex}" ng-click="chonHoaDon($index)">
+                Hóa Đơn #{{$index + 1}}
+            </a>
+        </li>
+    </ul>
+
+    <!-- Nội dung hóa đơn -->
+    <div class="tab-content mt-3">
+        <div class="tab-pane fade show active" ng-if="hoaDons.length > 0">
+            <div class="container mt-4">
+                <!-- Tìm kiếm sản phẩm -->
+                <div class="card mt-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        Tìm kiếm sản phẩm
+                        <button class="btn btn-secondary" type="button" data-bs-toggle="modal"
+                            data-bs-target="#productListModal">
+                            Mở danh sách sản phẩm
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Nhập tên hoặc mã sản phẩm"
+                                aria-label="Tìm kiếm sản phẩm">
+                            <button class="btn btn-primary" type="button">Tìm kiếm</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Giỏ hàng -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Sản phẩm 
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Số lượng</th>
+                                    <th>Thành tiền</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="sp in hoaDons[selectedHoaDonIndex].sanPham">
+                                    <td>{{sp.ten}}</td>
+                                    <td>{{sp.gia | currency:"VND"}}</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="sp.soLuong" min="1"
+                                            ng-change="capNhatThanhTien(hoaDons[selectedHoaDonIndex], sp)">
+                                    </td>
+                                    <td>{{sp.thanhTien | currency:"VND"}}</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm"
+                                            ng-click="xoaSanPham(hoaDons[selectedHoaDonIndex], sp)">Xóa</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="text-end">
+                            <strong>Tổng cộng: {{hoaDons[selectedHoaDonIndex].tongTien | currency:"VND"}}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin thanh toán -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Thông tin thanh toán
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="customerName" class="form-label">Tên khách hàng</label>
+                            <input type="text" class="form-control" ng-model="hoaDons[selectedHoaDonIndex].customerName"
+                                placeholder="Nhập tên khách hàng">
+                        </div>
+                        <div class="mb-3">
+                            <label for="voucherCode" class="form-label">Mã Voucher</label>
+                            <input type="text" class="form-control" ng-model="hoaDons[selectedHoaDonIndex].voucher"
+                                placeholder="Nhập mã voucher nếu có">
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
+                            <select class="form-select" ng-model="hoaDons[selectedHoaDonIndex].paymentMethod">
+                                <option selected>Chọn phương thức thanh toán</option>
+                                <option value="cash">Tiền mặt</option>
+                                <option value="card">Thẻ ngân hàng</option>
+                                <option value="momo">Ví MoMo</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-success w-100">Thanh toán</button>
+                    </div>
+                </div>
+
+                <!-- Modal danh sách sản phẩm -->
+                <div class="modal fade" id="productListModal" tabindex="-1" aria-labelledby="productListModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="productListModalLabel">Danh sách sản phẩm</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3" ng-repeat="sp in danhSachSanPham">
+                                        <div class="card">
+                                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSt2-MqPUfv2VkQ8KkoXVz0fYwjbu_eVq3PSw&s"
+                                                class="card-img-top" alt="{{sp.ten}}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{sp.ten}}</h5>
+                                                <p class="card-text">{{sp.gia | currency:"VND"}}</p>
+                                                <button class="btn btn-primary w-100"
+                                                    ng-click="themSanPham(hoaDons[selectedHoaDonIndex], sp)">Thêm vào
+                                                    giỏ</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
